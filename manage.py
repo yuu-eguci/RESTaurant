@@ -13,8 +13,6 @@ def main():
     settings_module = 'RESTaurant.production' if 'WEBSITE_HOSTNAME' in os.environ else 'RESTaurant.settings'
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', settings_module)
 
-    print(os.environ)
-
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
