@@ -6,7 +6,15 @@ import sys
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'RESTaurant.settings')
+
+    # App Service 環境では RESTaurant.production を使います。
+    # NOTE: WEBSITE_HOSTNAME は App Service 環境のデフォルト環境変数です。
+    # NOTE: wsgi.py にも同様の設定があります。
+    settings_module = 'RESTaurant.production' if 'WEBSITE_HOSTNAME' in os.environ else 'RESTaurant.settings'
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', settings_module)
+
+    print(os.environ)
+
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
