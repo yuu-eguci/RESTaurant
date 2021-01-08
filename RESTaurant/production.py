@@ -1,6 +1,10 @@
 from .settings import *
 import os
 
+# NOTE: 無いと Did you install mysqlclient? と煽られます。
+import pymysql
+pymysql.install_as_MySQLdb()
+
 DEBUG = False
 
 # Configure the domain name using the environment variable
