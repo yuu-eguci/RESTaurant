@@ -112,3 +112,13 @@ class SnippetDetail(mixins.RetrieveModelMixin,
     #     snippet = self.get_object(pk)
     #     snippet.delete()
     #     return Response(status=status.HTTP_204_NO_CONTENT)
+
+# NOTE: てかさらにここ↓まで簡略化が可能。これが T3 の奥義。
+#       generic がツヨすぎる。
+#       【T3】終幕。
+# class SnippetList(generics.ListCreateAPIView):
+#     queryset = Snippet.objects.all()
+#     serializer_class = SnippetSerializer
+# class SnippetDetail(generics.RetrieveUpdateDestroyAPIView):
+#     queryset = Snippet.objects.all()
+#     serializer_class = SnippetSerializer
