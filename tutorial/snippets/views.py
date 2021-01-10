@@ -7,8 +7,13 @@ from rest_framework.parsers import JSONParser
 from snippets.models import Snippet
 from snippets.serializers import SnippetSerializer
 
+# NOTE: 【T2】で追加。
+from rest_framework import status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
-@csrf_exempt
+
+@api_view(['GET', 'POST'])
 def snippet_list(request):
     """
     List all code snippets, or create a new snippet.
@@ -16,15 +21,20 @@ def snippet_list(request):
     if request.method == 'GET':
         snippets = Snippet.objects.all()
         serializer = SnippetSerializer(snippets, many=True)
-        return JsonResponse(serializer.data, safe=False)
+        # NOTE: JsonResponse(serializer.data, safe=False) よりこっちのほうがいい。
+        #       Response で返すことによって web 画面に REST framework の view が出るようになる。
+        return Response(serializer.data)
 
     elif request.method == 'POST':
-        data = JSONParser().parse(request)
-        serializer = SnippetSerializer(data=data)
+        # data = JSONParser().parse(request)
+        # serializer = SnippetSerializer(data=data)
+        # NOTE: 以上の処理を request.data で簡略可。
+        serializer = SnippetSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return JsonResponse(serializer.data, status=201)
-        return JsonResponse(serializer.errors, status=400)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        # NOTE: status=400 -> status=status.HTTP_400_BAD_REQUEST こっちのほうがいい。
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @csrf_exempt
