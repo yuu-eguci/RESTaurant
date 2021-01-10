@@ -39,8 +39,9 @@ DATABASES = {
         'PASSWORD': os.environ['DJANGO_DATABASE_PASSWORD'],
         'HOST': os.environ['DJANGO_DATABASE_SERVER'],
         'PORT': '3306',
+        # なんだこれ? と思うだろうけれど、 AppService 用の設定なので脳死で書く。
         'OPTIONS': {
-            'sslmode': 'require',
-        },
+            'ssl': {'ssl-ca': '/var/www/html/BaltimoreCyberTrustRoot.crt.pem'}
+        }
     }
 }

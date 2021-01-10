@@ -32,6 +32,7 @@ def my_customized_server_error(request, template_name='500.html'):
     # NOTE: print が App Service で機能するかどうか確かめるために print しています。
     import traceback
     print(traceback.format_exc())
+    print('500 Error happened!(Japanese letters garble.)')
     # return HttpResponseServerError('<h1>Server Error (500)</h1>')
 
     # DEBUG = True と同様の画面を出します。
