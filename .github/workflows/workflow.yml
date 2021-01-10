@@ -50,6 +50,30 @@ jobs:
             .
             !venv/
 
+      # 成功時はこちらのステップが実行されます。
+      - name: Slack Notification on Success
+        if: success()
+        uses: rtCamp/action-slack-notify@v2.0.2
+        env:
+          SLACK_CHANNEL: restaurant
+          SLACK_COLOR: good
+          SLACK_MESSAGE: 'build-and-test job SUCCEEDED'
+          SLACK_TITLE: build-and-test job succeeded
+          SLACK_USERNAME: RESTaurant
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      # 失敗時はこちらのステップが実行されます。
+      - name: Slack Notification on Failure
+        uses: rtCamp/action-slack-notify@v2.0.2
+        if: failure()
+        env:
+          SLACK_CHANNEL: restaurant
+          SLACK_COLOR: danger
+          SLACK_MESSAGE: 'build-and-test job FAILED'
+          SLACK_TITLE: build-and-test job failed
+          SLACK_USERNAME: RESTaurant
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+
   # ジョブふたつめ。
   deploy-to-webapp:
     needs: build-and-test
