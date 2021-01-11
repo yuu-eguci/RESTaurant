@@ -6,6 +6,10 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
 from snippets.models import Snippet
 from snippets.serializers import SnippetSerializer
+from django.views.decorators.csrf import requires_csrf_token
+from django.http import (
+    HttpResponseServerError,
+)
 
 # NOTE: 【T2】で追加。
 from rest_framework import status
@@ -23,6 +27,10 @@ from django.contrib.auth.models import User
 from snippets.serializers import UserSerializer
 from rest_framework import permissions
 from snippets.permissions import IsOwnerOrReadOnly
+
+# NOTE: 【T5】で追加。
+from rest_framework import renderers
+from rest_framework.reverse import reverse
 
 
 # NOTE: @api_view(['GET', 'POST']) 付きの def で書いてしまうと
@@ -147,3 +155,36 @@ class UserList(generics.ListAPIView):
 class UserDetail(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+
+@api_view(['GET'])
+def api_root(request, format=None):
+    return Response({
+        'users': reverse('user-list', request=request, format=format),
+        'snippets': reverse('snippet-list', request=request, format=format)
+    })
+
+
+class SnippetHighlight(generics.GenericAPIView):
+    queryset = Snippet.objects.all()
+    renderer_classes = [renderers.StaticHTMLRenderer]
+
+    def get(self, request, *args, **kwargs):
+        snippet = self.get_object()
+        return Response(snippet.highlighted)
+
+
+@requires_csrf_token
+def my_customized_server_error(request, template_name='500.html'):
+
+    # NOTE: print が App Service で機能するかどうか確かめるために print しています。
+    import traceback
+    print(traceback.format_exc())
+    print('500 Error happened!(Japanese letters garble.)')
+    # return HttpResponseServerError('<h1>Server Error (500)</h1>')
+
+    # DEBUG = True と同様の画面を出します。
+    import sys
+    from django.views import debug
+    error_html = debug.technical_500_response(request, *sys.exc_info()).content
+    return HttpResponseServerError(error_html)
