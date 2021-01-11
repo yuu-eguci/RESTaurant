@@ -18,6 +18,12 @@ from django.http import Http404
 from rest_framework import mixins
 from rest_framework import generics
 
+# NOTE: 【T4】で追加。
+from django.contrib.auth.models import User
+from snippets.serializers import UserSerializer
+from rest_framework import permissions
+from snippets.permissions import IsOwnerOrReadOnly
+
 
 # NOTE: @api_view(['GET', 'POST']) 付きの def で書いてしまうと
 #       if request.method == 'GET':
@@ -33,10 +39,15 @@ class SnippetList(mixins.ListModelMixin,
     queryset = Snippet.objects.all()
     serializer_class = SnippetSerializer
 
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
 
-    # NOTE: mixins や querysetｍ serializer_class を使うことで、
+    # NOTE: mixins や queryset serializer_class を使うことで、
     #       この↓メソッドがめちゃカンタン↑になります。【T3】
     # def get(self, request, format=None):
     #     snippets = Snippet.objects.all()
@@ -72,6 +83,10 @@ class SnippetDetail(mixins.RetrieveModelMixin,
 
     queryset = Snippet.objects.all()
     serializer_class = SnippetSerializer
+
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly,
+                          IsOwnerOrReadOnly]
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
@@ -122,3 +137,13 @@ class SnippetDetail(mixins.RetrieveModelMixin,
 # class SnippetDetail(generics.RetrieveUpdateDestroyAPIView):
 #     queryset = Snippet.objects.all()
 #     serializer_class = SnippetSerializer
+
+
+class UserList(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+
+class UserDetail(generics.RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
