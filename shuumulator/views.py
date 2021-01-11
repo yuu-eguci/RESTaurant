@@ -1,10 +1,12 @@
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, status
 from shuumulator.models import Stock, TradingRecord, Trader
 from shuumulator.serializers import (
     StockSerializer,
     TradingRecordSerializer,
     TraderSerializer
 )
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 
 class StockViewSet(viewsets.ModelViewSet):
@@ -32,3 +34,13 @@ class TraderViewSet(viewsets.ModelViewSet):
     queryset = Trader.objects.all()
     serializer_class = TraderSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+
+@api_view(['GET'])
+def call_executetrade(request):
+
+    # python manage.py executetrade と同じコールを行います。
+    from django.core import management
+    result = management.call_command('executetrade')
+
+    return Response({'result': result}, status=status.HTTP_200_OK)

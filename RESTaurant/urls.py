@@ -71,6 +71,7 @@ urlpatterns = [
                  namespace='rest_framework'),
          ),
     path('commands/samplecommand/', views.call_samplecommand),
+    path('commands/executetrade/', shuumulator_views.call_executetrade),
 ]
 
 handler500 = views.my_customized_server_error
