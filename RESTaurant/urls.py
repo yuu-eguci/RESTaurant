@@ -16,6 +16,7 @@ Including another URLconf
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 from snippets import views
+from shuumulator import views as shuumulator_views
 # from snippets.views import SnippetViewSet, UserViewSet, api_root, my_customized_server_error
 from rest_framework import renderers
 
@@ -26,8 +27,11 @@ from rest_framework import renderers
 # Create a router and register our viewsets with it.
 # NOTE: view クラスではなく ViewSet を使うことでこういうやり方ができる。
 router = DefaultRouter()
-router.register(r'snippets', views.SnippetViewSet)
-router.register(r'users', views.UserViewSet)
+# router.register(r'snippets', views.SnippetViewSet)
+# router.register(r'users', views.UserViewSet)
+router.register(r'stock', shuumulator_views.StockViewSet)
+router.register(r'tradingrecord', shuumulator_views.TradingRecordViewSet)
+router.register(r'trader', shuumulator_views.TraderViewSet)
 
 # NOTE: ViewSet を使って↑のように書くことで、これが全部省略できる。
 # snippet_list = SnippetViewSet.as_view({
@@ -61,6 +65,11 @@ urlpatterns = [
     # path('snippets/<int:pk>/highlight/', snippet_highlight, name='snippet-highlight'),
     # path('users/', user_list, name='user-list'),
     # path('users/<int:pk>/', user_detail, name='user-detail'),
+    # NOTE: これがないと画面に login のリンクすら出ない。
+    path('api-auth/',
+         include('rest_framework.urls',
+                 namespace='rest_framework'),
+         ),
     path('commands/samplecommand/', views.call_samplecommand),
 ]
 
