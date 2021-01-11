@@ -194,7 +194,7 @@ class UserDetail(generics.RetrieveAPIView):
 def api_root(request, format=None):
     return Response({
         'users': reverse('user-list', request=request, format=format),
-        'snippets': reverse('snippet-list', request=request, format=format)
+        'snippets': reverse('snippet-list', request=request, format=format),
     })
 
 
@@ -221,3 +221,13 @@ def my_customized_server_error(request, template_name='500.html'):
     from django.views import debug
     error_html = debug.technical_500_response(request, *sys.exc_info()).content
     return HttpResponseServerError(error_html)
+
+
+@api_view(['GET'])
+def call_samplecommand(request):
+
+    # python manage.py samplecommand と同じコールを行います。
+    from django.core import management
+    result = management.call_command('samplecommand')
+
+    return Response({'result': result}, status=status.HTTP_200_OK)

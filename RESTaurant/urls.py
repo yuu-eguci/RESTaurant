@@ -61,6 +61,7 @@ urlpatterns = [
     # path('snippets/<int:pk>/highlight/', snippet_highlight, name='snippet-highlight'),
     # path('users/', user_list, name='user-list'),
     # path('users/<int:pk>/', user_detail, name='user-detail'),
+    path('commands/samplecommand/', views.call_samplecommand),
 ]
 
 handler500 = views.my_customized_server_error
