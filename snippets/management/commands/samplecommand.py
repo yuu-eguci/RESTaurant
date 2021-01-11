@@ -10,3 +10,4 @@ class Command(BaseCommand):
         iso = now.strftime('%Y-%m-%dT%H:%M:%SZ')
         tzinfo = now.tzinfo
         self.stdout.write(f'timezone.now(): {iso}, tzinfo: {tzinfo}')
+        print(f'timezone.now(): {iso}, tzinfo: {tzinfo}')
