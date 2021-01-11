@@ -1,0 +1,34 @@
+name: Execute commands regularly
+
+# NOTE: 本 schedule 追加の経緯です↓
+#       - samplecommand を定期実行したい。
+#       - Azure App Service の cron サービスとしては WebJobs があるが
+#         App Service on Linux ではまだサポートされていない。 -> クソ
+#       - GitHub Actions から App Service の SSH へ接続することを考えたが
+#         そんな Action が無い。
+#       - az webapp create-remote-connection コマンドを使うことも考えたが
+#         コンソールがふたつ必要な仕組みらしい -> ダメ。
+#       - そもそも create-remote-connection はプレビュー段階だと doc にある。
+#       - じゃあいいよ、 url 用意して、 url 自体を定期的に呼ぶから!
+#         とんでもなくアホ。
+on:
+  push:
+    branches:
+      - master
+  # NOTE: GitHub Actions の最短インターバルは5分。
+  #       GitHub Actions は全然時間通り動かない。
+  # At minute 30 past every hour from 0 through 6 on every day-of-week from Monday through Friday.
+  # 30 0-6 * * 1-5
+  schedule:
+    - cron: '*/5 * * * *'
+
+jobs:
+
+  cron-job:
+    name: foo
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Execute command
+        run: |
+          curl -i -X GET ${{ secrets.APP_SERVICE_URL }}/commands/samplecommand/
