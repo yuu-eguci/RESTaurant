@@ -99,6 +99,7 @@ jobs:
       # SCM_DO_BUILD_DURING_DEPLOYMENT: oryx ビルドパイプラインを有効にするものらしいがよくわからないです。
       # DJANGO_ENV: Django を production にします。
       # NOTE: settings.py だけしか設定ファイルがないとき有効なのかは知りません。
+      #       -> 設定ファイルは manage.py や wsgi.py で分岐させています。 DJANGO_ENV は関係ありません。
       - name: Disable static collection and set migration command on App Service
         uses: Azure/appservice-settings@v1
         with:
@@ -118,6 +119,7 @@ jobs:
       - name: Deploy to App Service
         uses: azure/webapps-deploy@v2
         with:
+          # NOTE: おそらく? azure/login@v1 を使わない場合は publish-profile が必要なのだと思う。
           app-name: RESTaurant-app-service
 
       # Azure logout
