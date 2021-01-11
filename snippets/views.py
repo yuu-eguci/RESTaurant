@@ -32,6 +32,31 @@ from snippets.permissions import IsOwnerOrReadOnly
 from rest_framework import renderers
 from rest_framework.reverse import reverse
 
+# NOTE: 【T6】で追加。
+from rest_framework import viewsets
+from rest_framework.decorators import action
+
+
+class SnippetViewSet(viewsets.ModelViewSet):
+    """
+    This viewset automatically provides `list`, `create`, `retrieve`,
+    `update` and `destroy` actions.
+
+    Additionally we also provide an extra `highlight` action.
+    """
+    queryset = Snippet.objects.all()
+    serializer_class = SnippetSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly,
+                          IsOwnerOrReadOnly]
+
+    @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+    def highlight(self, request, *args, **kwargs):
+        snippet = self.get_object()
+        return Response(snippet.highlighted)
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
 
 # NOTE: @api_view(['GET', 'POST']) 付きの def で書いてしまうと
 #       if request.method == 'GET':
@@ -145,6 +170,14 @@ class SnippetDetail(mixins.RetrieveModelMixin,
 # class SnippetDetail(generics.RetrieveUpdateDestroyAPIView):
 #     queryset = Snippet.objects.all()
 #     serializer_class = SnippetSerializer
+
+
+class UserViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    This viewset automatically provides `list` and `retrieve` actions.
+    """
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
 
 
 class UserList(generics.ListAPIView):
