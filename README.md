@@ -3,6 +3,8 @@ RESTaurant
 
 Django Rest framework + Azure App Service + MySQL + CI/CD by GitHub Actions = test
 
+![readme](https://user-images.githubusercontent.com/28250432/104155388-73050300-542a-11eb-9e16-a9d3fae927d8.png)
+
 ## Installation
 
 ```bash
