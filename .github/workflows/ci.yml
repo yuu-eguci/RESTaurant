@@ -48,7 +48,7 @@ jobs:
       - name: Smoke test
         run: |
           docker compose up -d
-          for i in $(seq 1 30); do
+          for _ in $(seq 1 30); do
             curl --fail --silent http://localhost:8000/ && exit 0
             sleep 2
           done

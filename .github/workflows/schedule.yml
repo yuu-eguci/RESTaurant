@@ -1,19 +1,8 @@
 name: Execute commands regularly
 
-# NOTE: 本 schedule 追加の経緯です↓
-#       - samplecommand を定期実行したい。
-#       - Azure App Service の cron サービスとしては WebJobs があるが
-#         App Service on Linux ではまだサポートされていない。 -> クソ
-#       - GitHub Actions から App Service の SSH へ接続することを考えたが
-#         そんな Action が無い。
-#       - az webapp create-remote-connection コマンドを使うことも考えたが
-#         コンソールがふたつ必要な仕組みらしい -> ダメ。
-#       - そもそも create-remote-connection はプレビュー段階だと doc にある。
-#       - じゃあいいよ、 url 用意して、 url 自体を定期的に呼ぶから!
-#         とんでもなくアホ。
-#       - (後日) command の url は管理ユーザしか呼べないようにしたので、
-#         Basic 認証 (APP_SERVICE_COMMAND_USER secret に "user:password") で POST します。
-#       - (後日) 5分おきに叩き続けないよう、 schedule と push は止めて手動実行のみにしています。
+# 管理ユーザの Basic 認証で command を POST します。
+# 自動の定期実行は行わず、手動実行だけを受け付けます。
+
 on:
   workflow_dispatch:
   # NOTE: GitHub Actions の最短インターバルは5分。
