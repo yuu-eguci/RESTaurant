@@ -57,7 +57,17 @@ def test_production_uses_secret_key_from_environment_and_disables_debug():
     assert production.ALLOWED_HOSTS == ["restaurant.example.com"]
     assert production.SESSION_COOKIE_SECURE is True
     assert production.CSRF_COOKIE_SECURE is True
-    assert production.CSRF_TRUSTED_ORIGINS == ["https://restaurant.example.com"]
+
+
+def test_production_trusts_app_service_https_proxy():
+    production = load_settings(
+        "RESTaurant.production",
+        {**PRODUCTION_ENV, "DJANGO_SECRET_KEY": "production-secret"},
+    )
+
+    assert production.SECURE_PROXY_SSL_HEADER == ("HTTP_X_FORWARDED_PROTO", "https")
+    assert production.SECURE_SSL_REDIRECT is True
+    assert production.SECURE_HSTS_SECONDS > 0
 
 
 @pytest.mark.django_db

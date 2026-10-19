@@ -19,9 +19,14 @@ CSRF_COOKIE_SECURE = True
 # that Azure automatically creates for us.
 ALLOWED_HOSTS = [os.environ["WEBSITE_HOSTNAME"]] if "WEBSITE_HOSTNAME" in os.environ else []
 
-# NOTE: App Service は HTTPS を手前で終端するので、 Django からは HTTP に見えます。
-#       Django 4.0 以降の Origin チェックで POST が弾かれないよう、 HTTPS の自ホストを信頼します。
-CSRF_TRUSTED_ORIGINS = [f"https://{host}" for host in ALLOWED_HOSTS]
+# NOTE: App Service は HTTPS を手前で終端し、 X-Forwarded-Proto を付けて転送します。
+#       これを信頼して HTTPS と判定させ、 HTTP で来たら HTTPS へリダイレクトします。
+#       (HTTPS と判定できるので、 Django 4.0 以降の Origin チェックも通ります。)
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SECURE_SSL_REDIRECT = True
+# NOTE: まずは短めの1時間にしています。
+#       *.azurewebsites.net は自分のドメインではないので subdomains や preload は付けません。
+SECURE_HSTS_SECONDS = 3600
 
 # WhiteNoise configuration
 MIDDLEWARE = [

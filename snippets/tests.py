@@ -62,3 +62,25 @@ def test_server_error_does_not_leak_details(admin_user):
     assert "very-internal-detail" not in body
     assert "Traceback" not in body
     assert "SECRET_KEY" not in body
+
+
+@pytest.mark.django_db
+def test_samplecommand_endpoint_accepts_session_post_behind_https_proxy(admin_user, settings):
+    settings.ALLOWED_HOSTS = ["restaurant.example.com"]
+    settings.SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    settings.SECURE_SSL_REDIRECT = True
+    client = Client(enforce_csrf_checks=True, HTTP_HOST="restaurant.example.com")
+    client.force_login(admin_user)
+
+    assert client.get(URL).status_code == 301
+
+    https = {"HTTP_X_FORWARDED_PROTO": "https"}
+    client.get("/api-auth/login/", **https)
+    response = client.post(
+        URL,
+        HTTP_ORIGIN="https://restaurant.example.com",
+        HTTP_X_CSRFTOKEN=client.cookies["csrftoken"].value,
+        **https,
+    )
+
+    assert response.status_code == 200
