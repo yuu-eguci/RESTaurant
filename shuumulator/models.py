@@ -12,7 +12,7 @@ class Stock(models.Model):
     name = models.TextField()
 
     class Meta:
-        ordering = ['name']
+        ordering = ["name"]
 
 
 class TradingRecord(models.Model):
@@ -22,15 +22,16 @@ class TradingRecord(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    stock = models.ForeignKey('Stock', on_delete=models.CASCADE)
-    trader = models.ForeignKey('Trader', on_delete=models.CASCADE)
+    stock = models.ForeignKey("Stock", on_delete=models.CASCADE)
+    trader = models.ForeignKey("Trader", on_delete=models.CASCADE)
     bought_price = models.DecimalField(decimal_places=2, max_digits=10)
     bought_at = models.DateTimeField()
-    sold_price = models.DecimalField(decimal_places=2, max_digits=10)
-    sold_at = models.DateTimeField()
+    # NOTE: 売却前は空です。
+    sold_price = models.DecimalField(decimal_places=2, max_digits=10, null=True, blank=True)
+    sold_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        ordering = ['updated_at']
+        ordering = ["updated_at"]
         # HACK: インデックスはこう設定できます。
         # indexes = [
         #     models.Index(fields=['last_name', 'first_name']),
@@ -48,4 +49,4 @@ class Trader(models.Model):
     name = models.TextField()
 
     class Meta:
-        ordering = ['updated_at']
+        ordering = ["updated_at"]

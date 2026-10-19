@@ -11,16 +11,20 @@ name: Execute commands regularly
 #       - そもそも create-remote-connection はプレビュー段階だと doc にある。
 #       - じゃあいいよ、 url 用意して、 url 自体を定期的に呼ぶから!
 #         とんでもなくアホ。
+#       - (後日) command の url は管理ユーザしか呼べないようにしたので、
+#         Basic 認証 (APP_SERVICE_COMMAND_USER secret に "user:password") で POST します。
+#       - (後日) 5分おきに叩き続けないよう、 schedule と push は止めて手動実行のみにしています。
 on:
-  push:
-    branches:
-      - master
+  workflow_dispatch:
   # NOTE: GitHub Actions の最短インターバルは5分。
   #       GitHub Actions は全然時間通り動かない。
   # At minute 30 past every hour from 0 through 6 on every day-of-week from Monday through Friday.
   # 30 0-6 * * 1-5
-  schedule:
-    - cron: '*/5 * * * *'
+  # schedule:
+  #   - cron: '*/5 * * * *'
+
+permissions:
+  contents: read
 
 jobs:
 
@@ -30,5 +34,8 @@ jobs:
 
     steps:
       - name: Execute command
+        env:
+          APP_SERVICE_URL: ${{ secrets.APP_SERVICE_URL }}
+          APP_SERVICE_COMMAND_USER: ${{ secrets.APP_SERVICE_COMMAND_USER }}
         run: |
-          curl -i -X GET ${{ secrets.APP_SERVICE_URL }}/commands/samplecommand/
+          curl --fail -i -X POST --user "$APP_SERVICE_COMMAND_USER" "$APP_SERVICE_URL/commands/samplecommand/"

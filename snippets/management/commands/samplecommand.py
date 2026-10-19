@@ -3,11 +3,11 @@ from django.utils import timezone
 
 
 class Command(BaseCommand):
-    help = 'Displays current time'
+    help = "Displays current time"
 
     def handle(self, *args, **kwargs):
         now = timezone.now()
-        iso = now.strftime('%Y-%m-%dT%H:%M:%SZ')
+        iso = now.strftime("%Y-%m-%dT%H:%M:%SZ")
         tzinfo = now.tzinfo
-        self.stdout.write(f'timezone.now(): {iso}, tzinfo: {tzinfo}')
-        print(f'timezone.now(): {iso}, tzinfo: {tzinfo}')
+        self.stdout.write(f"timezone.now(): {iso}, tzinfo: {tzinfo}")
+        print(f"timezone.now(): {iso}, tzinfo: {tzinfo}")

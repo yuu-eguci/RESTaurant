@@ -1,40 +1,12 @@
-from django.shortcuts import render
-
-# Create your views here.
-from django.http import HttpResponse, JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework.parsers import JSONParser
-from snippets.models import Snippet
-from snippets.serializers import SnippetSerializer
-from django.views.decorators.csrf import requires_csrf_token
-from django.http import (
-    HttpResponseServerError,
-)
-
-# NOTE: 【T2】で追加。
-from rest_framework import status
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-
-# NOTE: 【T3】で追加。
-from rest_framework.views import APIView
-from django.http import Http404
-from rest_framework import mixins
-from rest_framework import generics
-
-# NOTE: 【T4】で追加。
 from django.contrib.auth.models import User
-from snippets.serializers import UserSerializer
-from rest_framework import permissions
-from snippets.permissions import IsOwnerOrReadOnly
-
-# NOTE: 【T5】で追加。
-from rest_framework import renderers
+from rest_framework import generics, mixins, permissions, renderers, status, viewsets
+from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
-# NOTE: 【T6】で追加。
-from rest_framework import viewsets
-from rest_framework.decorators import action
+from snippets.models import Snippet
+from snippets.permissions import IsOwnerOrReadOnly
+from snippets.serializers import SnippetSerializer, UserSerializer
 
 
 class SnippetViewSet(viewsets.ModelViewSet):
@@ -44,10 +16,10 @@ class SnippetViewSet(viewsets.ModelViewSet):
 
     Additionally we also provide an extra `highlight` action.
     """
+
     queryset = Snippet.objects.all()
     serializer_class = SnippetSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly,
-                          IsOwnerOrReadOnly]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
     @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
     def highlight(self, request, *args, **kwargs):
@@ -62,9 +34,7 @@ class SnippetViewSet(viewsets.ModelViewSet):
 #       if request.method == 'GET':
 #       elif request.method == 'POST':
 #       でリクエスト分けをすることになってしまいます。 class のほうが洗練されています。
-class SnippetList(mixins.ListModelMixin,
-                  mixins.CreateModelMixin,
-                  generics.GenericAPIView):
+class SnippetList(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
     """
     List all snippets, or create a new snippet.
     """
@@ -106,10 +76,9 @@ class SnippetList(mixins.ListModelMixin,
 
 
 # NOTE: ↑と同じく @api_view(['GET', 'PUT', 'DELETE']) 付きの def では書かない。
-class SnippetDetail(mixins.RetrieveModelMixin,
-                    mixins.UpdateModelMixin,
-                    mixins.DestroyModelMixin,
-                    generics.GenericAPIView):
+class SnippetDetail(
+    mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, generics.GenericAPIView
+):
     """
     Retrieve, update or delete a snippet instance.
     """
@@ -117,9 +86,7 @@ class SnippetDetail(mixins.RetrieveModelMixin,
     queryset = Snippet.objects.all()
     serializer_class = SnippetSerializer
 
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly,
-                          IsOwnerOrReadOnly]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
@@ -161,6 +128,7 @@ class SnippetDetail(mixins.RetrieveModelMixin,
     #     snippet.delete()
     #     return Response(status=status.HTTP_204_NO_CONTENT)
 
+
 # NOTE: てかさらにここ↓まで簡略化が可能。これが T3 の奥義。
 #       generic がツヨすぎる。
 #       【T3】終幕。
@@ -176,6 +144,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     """
     This viewset automatically provides `list` and `retrieve` actions.
     """
+
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
@@ -190,12 +159,14 @@ class UserDetail(generics.RetrieveAPIView):
     serializer_class = UserSerializer
 
 
-@api_view(['GET'])
+@api_view(["GET"])
 def api_root(request, format=None):
-    return Response({
-        'users': reverse('user-list', request=request, format=format),
-        'snippets': reverse('snippet-list', request=request, format=format),
-    })
+    return Response(
+        {
+            "users": reverse("user-list", request=request, format=format),
+            "snippets": reverse("snippet-list", request=request, format=format),
+        }
+    )
 
 
 class SnippetHighlight(generics.GenericAPIView):
@@ -207,27 +178,15 @@ class SnippetHighlight(generics.GenericAPIView):
         return Response(snippet.highlighted)
 
 
-@requires_csrf_token
-def my_customized_server_error(request, template_name='500.html'):
-
-    # NOTE: print が App Service で機能するかどうか確かめるために print しています。
-    import traceback
-    print(traceback.format_exc())
-    print('500 Error happened!(Japanese letters garble.)')
-    # return HttpResponseServerError('<h1>Server Error (500)</h1>')
-
-    # DEBUG = True と同様の画面を出します。
-    import sys
-    from django.views import debug
-    error_html = debug.technical_500_response(request, *sys.exc_info()).content
-    return HttpResponseServerError(error_html)
-
-
-@api_view(['GET'])
+# NOTE: 誰でも command を叩けないよう、管理ユーザ (staff) 限定にしています。
+#       リンクを開いただけで動かないよう (CSRF 対策)、 POST にしています。
+@api_view(["POST"])
+@permission_classes([permissions.IsAdminUser])
 def call_samplecommand(request):
 
     # python manage.py samplecommand と同じコールを行います。
     from django.core import management
-    result = management.call_command('samplecommand')
 
-    return Response({'result': result}, status=status.HTTP_200_OK)
+    result = management.call_command("samplecommand")
+
+    return Response({"result": result}, status=status.HTTP_200_OK)
